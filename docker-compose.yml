@@ -1,0 +1,34 @@
+version: '3'
+services:
+  api:
+    container_name: api
+    build: .
+    env_file: .env
+    command: npm run wait:db:start:api
+    volumes:
+      -  .:/usr/src/app
+    ports:
+      - "9100:9100"
+    depends_on:
+      - redis
+    links:
+      - "redis:redis"
+    networks:
+      - scheduler-network
+
+  redis:
+    container_name: redis
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - scheduler-network
+networks:
+  scheduler-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.237.0/24
+volumes:
+  db-data:
