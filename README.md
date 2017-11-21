@@ -11,6 +11,7 @@ Write an API service that will have the ```ExtractInfoFromWebsite``` method that
 - ```depth```, the depth of which to go forward in the crawling process
 
 Processed pages should be kept in cache
+
 Need to make sure no endless recursion will happen when parsing the same page more than once
 
 There should be 2 keys in the configuration file
