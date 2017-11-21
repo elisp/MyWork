@@ -55,38 +55,41 @@ namespace Crawler.Engine
 
         private void ProcessPage(string url, string[] words, int depth, CrawlResult aggrigate)
         {
-            CrawlResult processedPage;
-            if (!this.cache.TryGetValue(url, out processedPage))
+            if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
             {
-                lock (Crawler.LOCK)
+                CrawlResult processedPage;
+                if (!this.cache.TryGetValue(url, out processedPage))
                 {
-                    if (!this.cache.TryGetValue(url, out processedPage))
+                    lock (Crawler.LOCK)
                     {
-                        processedPage = new CrawlResult();
-                        string content = this.GetContent(url);
-                        if (!string.IsNullOrWhiteSpace(content))
+                        if (!this.cache.TryGetValue(url, out processedPage))
                         {
-                          foreach (string word in words)
-                          {
-                              processedPage.Statistics[word] = this.GetNumberOfOccorences(content, word);
-                          }
-                            processedPage.Links = this.GetLinks(content);
+                            processedPage = new CrawlResult();
+                            string content = this.GetContent(url);
+                            if (!string.IsNullOrWhiteSpace(content))
+                            {
+                                foreach (string word in words)
+                                {
+                                    processedPage.Statistics[word] = this.GetNumberOfOccorences(content, word);
+                                }
+                                processedPage.Links = this.GetLinks(content);
+                            }
+                            this.cache.CreateEntry(url)
+                            .SetValue(processedPage)
+                            .SetSlidingExpiration(TimeSpan.FromMinutes(this.options.URL_EXPIRATION_PERIOD));
                         }
-                        this.cache.CreateEntry(url)
-                        .SetValue(processedPage)
-                        .SetSlidingExpiration(TimeSpan.FromMinutes(this.options.URL_EXPIRATION_PERIOD));
                     }
-                }
-                if (depth > 1)
-                {
-                    foreach (string link in processedPage.Links)
+                    if (depth > 1)
                     {
-                        this.ProcessPage(link, words, depth - 1, aggrigate);
+                        foreach (string link in processedPage.Links)
+                        {
+                            this.ProcessPage(link, words, depth - 1, aggrigate);
+                        }
                     }
                 }
+                this.CopyStatistics(processedPage, aggrigate);
+                // return aggrigate;
             }
-            this.CopyStatistics(processedPage, aggrigate);
-            // return aggrigate;
         }
 
         private void CopyStatistics(CrawlResult source, CrawlResult target)

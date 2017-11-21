@@ -21,7 +21,8 @@ namespace Crawler.WebApi.Controllers
 
         [HttpGet("{url}")]
         [HttpGet("{words}")]
-        [HttpGet("{depth}")]
+        [HttpGet("{depth:int}")]
+        [Route("[action]")]
         public IDictionary<string, int> ExtractInfoFromWebsite(string url, string[] words, int depth)
         {
             Crawler.Engine.Crawler crawler = new Crawler.Engine.Crawler(this.cache, this.options);

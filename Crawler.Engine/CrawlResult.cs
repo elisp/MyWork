@@ -12,6 +12,7 @@ namespace Crawler.Engine
 
         public CrawlResult()
         {
+            this.Links = new HashSet<string>();
             this.Success = true;
         }
 
