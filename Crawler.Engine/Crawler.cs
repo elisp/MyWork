@@ -4,21 +4,26 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Crawler.Engine
 {
     public class Crawler
     {
+        private static readonly object COUNTER_LOCK = new object();
         private static readonly object COPY_LOCK = new object();
         private static readonly object LOCK = new object();
         private readonly IMemoryCache cache;
         private readonly Options options;
+        private readonly TasksManager tasksManager;
+        private int threadCount = 0;
 
-        public Crawler(IMemoryCache cache, Options options)
+        public Crawler(IMemoryCache cache, Options options, TasksManager taskManager)
         {
             this.cache = cache;
             this.options = options;
+            this.tasksManager = taskManager;
         }
         private ISet<string> GetLinks(string content)
         {
@@ -53,8 +58,28 @@ namespace Crawler.Engine
             return data;
         }
 
-        private void ProcessPage(string url, string[] words, int depth, CrawlResult aggrigate)
+        private void IncreaseCounter()
         {
+            lock (Crawler.COUNTER_LOCK)
+            {
+                this.threadCount += 1;
+                Console.WriteLine("Counter = {0}", this.threadCount);
+            }
+        }
+
+        private void DecreaseCounter()
+        {
+            lock (Crawler.COUNTER_LOCK)
+            {
+                this.threadCount -= 1;
+                Console.WriteLine("Counter = {0}", this.threadCount);
+            }
+        }
+
+        private void ProcessPage(string url, string[] words, int depth, CrawlResult aggrigate, bool ignoreIncreaseCounter = false)
+        {
+            if (!ignoreIncreaseCounter)
+                this.IncreaseCounter();
             if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
             {
                 CrawlResult processedPage;
@@ -76,20 +101,24 @@ namespace Crawler.Engine
                             }
                             this.cache.CreateEntry(url)
                             .SetValue(processedPage)
-                            .SetSlidingExpiration(TimeSpan.FromMinutes(this.options.URL_EXPIRATION_PERIOD));
+                            .SetSlidingExpiration(TimeSpan.FromMinutes(this.options.UrlExpirationPeriod));
                         }
                     }
                     if (depth > 1)
                     {
                         foreach (string link in processedPage.Links)
                         {
-                            this.ProcessPage(link, words, depth - 1, aggrigate);
+                            this.tasksManager.AddWork(() =>
+                            {
+                                this.ProcessPage(link, words, depth - 1, aggrigate);
+                            });
                         }
                     }
                 }
                 this.CopyStatistics(processedPage, aggrigate);
                 // return aggrigate;
             }
+            this.DecreaseCounter();
         }
 
         private void CopyStatistics(CrawlResult source, CrawlResult target)
@@ -110,7 +139,16 @@ namespace Crawler.Engine
         public CrawlResult ExtractInfoFromWebsite(string url, string[] words, int depth)
         {
             CrawlResult result = new CrawlResult();
-            ProcessPage(url, words, depth, result);
+            this.IncreaseCounter();
+            this.tasksManager.AddWork(() =>
+            {
+                ProcessPage(url, words, depth, result, true);
+            });
+            do
+            {
+                SpinWait.SpinUntil(() => Volatile.Read(ref this.threadCount) == 0);
+            }
+            while (Volatile.Read(ref this.threadCount) > 0);
             return result;
         }
     }

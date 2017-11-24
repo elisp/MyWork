@@ -2,7 +2,12 @@ namespace Crawler.Engine
 {
     public class Options
     {
-        public int MAX_AVAILABLE_THREADS { get; set; } = 2;
-        public int URL_EXPIRATION_PERIOD { get; set; } = 3;
+        public Options()
+        {
+            this.MaxAvailableThreads = 20;
+            this.UrlExpirationPeriod = 1;
+        }
+        public int MaxAvailableThreads { get; set; }
+        public int UrlExpirationPeriod { get; set; }
     }
 }

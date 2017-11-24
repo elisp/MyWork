@@ -26,11 +26,15 @@ namespace Crawler.WebApi
             // Adds services required for using options.
             services.AddOptions();
 
-            // Register the IConfiguration instance which MyOptions binds against.
-            services.Configure<Crawler.Engine.Options>(Configuration);
+            Engine.Options options = new Engine.Options();
+
+            services.AddSingleton<Engine.Options>(options);
+            services.AddSingleton<Engine.TasksManager>(new Engine.TasksManager(options));
 
             services.AddMemoryCache();
             services.AddMvc();
+            services.AddSingleton < IConfiguration > (Configuration);
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

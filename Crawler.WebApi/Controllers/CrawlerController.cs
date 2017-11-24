@@ -12,11 +12,13 @@ namespace Crawler.WebApi.Controllers
     {
         private IMemoryCache cache;
         private readonly Crawler.Engine.Options options;
+        private readonly Crawler.Engine.TasksManager taskManager;
 
-        public CrawlerController(IMemoryCache cache, IOptions<Crawler.Engine.Options> optionsAccessor)
+        public CrawlerController(IMemoryCache cache, IOptions<Engine.Options> optionsAccessor, Crawler.Engine.TasksManager taskManager)
         {
             this.cache = cache;
             this.options = optionsAccessor.Value;
+            this.taskManager = taskManager;
         }
 
         [HttpGet("{url}")]
@@ -25,7 +27,7 @@ namespace Crawler.WebApi.Controllers
         [Route("[action]")]
         public IDictionary<string, int> ExtractInfoFromWebsite(string url, string[] words, int depth)
         {
-            Crawler.Engine.Crawler crawler = new Crawler.Engine.Crawler(this.cache, this.options);
+            Crawler.Engine.Crawler crawler = new Crawler.Engine.Crawler(this.cache, this.options, this.taskManager);
             return crawler.ExtractInfoFromWebsite(url, words, depth).Statistics;
         }
     }
