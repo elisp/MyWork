@@ -1,6 +1,9 @@
-# MyWork
+# Readers–writer lock
 
-In this repository I keep some of the challenges which I run into during the time when I work as software developer.
-There are some cool things here and there are some more challenging stuff.
+## Mission
+Wtrite a class with two methods:
+- ```Read``` this will read something from some resource and will allow multiple reads but *no write* is allowed as long as there are threads reading.  *No Read allowed* during ```write``` operaation
+- ```Write``` will write something to a resource.  During write operation *no other writes nor any reads allowed*
 
-If you'd like to see the list of things that I've added to this repo you need to use the branches dropdown for that...
+## Requirement
+Use mutex class and make sure the code is fully thread safe.
