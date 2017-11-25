@@ -1,0 +1,8 @@
+/Users/elispitzer/Git/mywork/DataAccess/bin/Debug/netstandard2.0/DataAccess.deps.json
+/Users/elispitzer/Git/mywork/DataAccess/bin/Debug/netstandard2.0/DataAccess.dll
+/Users/elispitzer/Git/mywork/DataAccess/bin/Debug/netstandard2.0/DataAccess.pdb
+/Users/elispitzer/Git/mywork/DataAccess/obj/Debug/netstandard2.0/DataAccess.csproj.CoreCompileInputs.cache
+/Users/elispitzer/Git/mywork/DataAccess/obj/Debug/netstandard2.0/DataAccess.AssemblyInfoInputs.cache
+/Users/elispitzer/Git/mywork/DataAccess/obj/Debug/netstandard2.0/DataAccess.AssemblyInfo.cs
+/Users/elispitzer/Git/mywork/DataAccess/obj/Debug/netstandard2.0/DataAccess.dll
+/Users/elispitzer/Git/mywork/DataAccess/obj/Debug/netstandard2.0/DataAccess.pdb
