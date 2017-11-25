@@ -4,7 +4,7 @@ namespace Crawler.Engine
     {
         public Options()
         {
-            this.MaxAvailableThreads = 20;
+            this.MaxAvailableThreads = 3;
             this.UrlExpirationPeriod = 1;
         }
         public int MaxAvailableThreads { get; set; }
