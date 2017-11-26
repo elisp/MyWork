@@ -58,7 +58,7 @@ typings/
 .env
 
 .DS_Store
-.vscode
+# .vscode
 
 # Dotnet core
 bin
