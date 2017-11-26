@@ -24,12 +24,14 @@ namespace DataAccess
             // Make the access to the readers counter atomic
             Monitor.Enter(ReadersWriter.LockRead);
             if (this.readersCount == 0)
+            {
                 /*
                     Ensure locking the write operation in case this is the first read
                     We lock it only for the first time in order to prevent other reads 
                     waiting for this lock to be released.
                  */
                 Monitor.Enter(ReadersWriter.LockWrite);
+            }
             // Increase the readers counter
             this.readersCount += 1;
             Monitor.Exit(ReadersWriter.LockRead);
@@ -45,11 +47,13 @@ namespace DataAccess
                 // Reduce readers counter
                 this.readersCount -= 1;
                 if (this.readersCount == 0)
+                {
                     /*
                         In case there are no more readers executing right now
                         Release the lock for writing
                      */
                     Monitor.Exit(ReadersWriter.LockWrite);
+                }
                 Monitor.Exit(ReadersWriter.LockRead);
             }
 

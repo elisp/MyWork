@@ -14,7 +14,7 @@ namespace DataAccess.UnitTests.Services
         }
 
         [Fact]
-        public void ReturnTrueForSingleWrite()
+        public void ReturnTrueForSingleRead()
         {
             var result = readersWriter.Read<bool>(() =>
             {
@@ -38,7 +38,7 @@ namespace DataAccess.UnitTests.Services
 
             Task task2 = Task.Factory.StartNew(() =>
             {
-                result[2] = readersWriter.Read<bool>(()=>{
+                result[1] = readersWriter.Read<bool>(()=>{
                     return true;
                 });
             });
