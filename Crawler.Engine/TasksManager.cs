@@ -58,9 +58,9 @@ namespace Crawler.Engine
                         Console.Write(ex);
                     }
                 }
-                SpinWait.SpinUntil(() => !Volatile.Read(ref doneEnqueueing) /*|| (queue.Count > 0)*/);
+                SpinWait.SpinUntil(() => !Volatile.Read(ref doneEnqueueing) || (queue.Count > 0));
 
-            } while (!Volatile.Read(ref doneEnqueueing) /*|| (queue.Count > 0)*/);
+            } while (!Volatile.Read(ref doneEnqueueing) || (queue.Count > 0));
         }
     }
 }
