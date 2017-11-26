@@ -5,6 +5,7 @@ namespace DataAccess
 {
     public class ReadersWriter
     {
+        private static readonly ManualResetEvent resetEvent = new ManualResetEvent(false);
         private static readonly object LockSync = new object();
         private static readonly object LockWrite = new object();
         private static readonly object LockRead = new object();
@@ -12,6 +13,7 @@ namespace DataAccess
 
         public T Read<T>(Func<T> readFunction)
         {
+            bool lockTaken = false;
             /*
                 There might be cases in which multiple reads are triggered
                 than a single write followed by more of multilpe reads
@@ -30,7 +32,7 @@ namespace DataAccess
                     We lock it only for the first time in order to prevent other reads 
                     waiting for this lock to be released.
                  */
-                Monitor.Enter(ReadersWriter.LockWrite);
+                Monitor.Enter(ReadersWriter.LockWrite, ref lockTaken);
             }
             // Increase the readers counter
             this.readersCount += 1;
@@ -52,11 +54,27 @@ namespace DataAccess
                         In case there are no more readers executing right now
                         Release the lock for writing
                      */
-                    Monitor.Exit(ReadersWriter.LockWrite);
+                    // if (!lockTaken)
+                    {
+                        //     resetEvent.Reset();
+                        //     resetEvent.WaitOne();
+                        //     Monitor.Exit(ReadersWriter.LockWrite);
+                        // }
+                        // else
+                        // {
+                        resetEvent.Set();
+                    }
                 }
                 Monitor.Exit(ReadersWriter.LockRead);
             }
-
+            // This is kinda workaround
+            // Only thie first thread that acquired the lock
+            // will release it
+            if (lockTaken)
+            {
+                resetEvent.WaitOne();
+                Monitor.Exit(ReadersWriter.LockWrite);
+            }
             return result;
         }
 

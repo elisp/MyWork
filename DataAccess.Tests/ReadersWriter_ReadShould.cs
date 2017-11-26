@@ -1,6 +1,8 @@
 using Xunit;
 using DataAccess;
 using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
 
 namespace DataAccess.UnitTests.Services
 {
@@ -27,25 +29,28 @@ namespace DataAccess.UnitTests.Services
         [Fact]
         public void ReturnTrueForTwoThreads()
         {
-            bool[] result = new bool[2] { false, false };
-
-            Task task1 = Task.Factory.StartNew(() =>
+            Task<bool> task1 = new Task<bool>(() =>
             {
-                result[0] = readersWriter.Read<bool>(()=>{
+                return readersWriter.Read<bool>(() =>
+                {
                     return true;
                 });
             });
 
-            Task task2 = Task.Factory.StartNew(() =>
+            Task<bool> task2 = new Task<bool>(() =>
             {
-                result[1] = readersWriter.Read<bool>(()=>{
-                    return true;
+                return readersWriter.Read<bool>(() =>
+                {
+                    return false;
                 });
             });
-            Task.WaitAll(task1, task2);
             
-            Assert.True(result[0], "Read should return true");
-            Assert.True(result[1], "Read should return true");
+            task1.Start();
+            task2.Start();
+            Task.WaitAll(task1, task2);
+
+            Assert.True(task1.Result, "Task1 should return true");
+            Assert.False(task2.Result, "Task2 should return false");
         }
     }
 }
